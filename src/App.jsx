@@ -1,99 +1,84 @@
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import "./App.css";
 
 function App() {
-  const [formField, setFormField] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-  });
-  const [errorMessage, setErrorMessage] = useState({});
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm();
+
   const [successMessage, setSuccessMessage] = useState("");
 
-  const handleChange = (e) => {
-    setFormField({ ...formField, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const errors = validate();
-    if (Object.keys(errors).length === 0) {
-      setSuccessMessage("Registration Successful");
-      setFormField({ firstName: "", lastName: "", email: "", password: "" });
-    } else {
-      setErrorMessage(errors);
-    }
-  };
-
-  const validate = () => {
-    const errors = {};
-    if (!formField.firstName.trim()) {
-      errors.firstName = "First Name is required";
-    }
-    if (!formField.lastName.trim()) {
-      errors.lastName = "Last Name is required";
-    }
-    if (!formField.email.trim()) {
-      errors.email = "Email is required";
-    }
-    if (!formField.password.trim()) {
-      errors.password = "password is required";
-    } else if (formField.password.length !== 10) {
-      errors.password = "Invalid password number";
-    }
-    return errors;
+  const onSubmit = (data) => {
+    setSuccessMessage("Registration successful!!!");
+    reset();
   };
 
   return (
     <>
       <div className="formField">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           {successMessage && <div className="success">{successMessage}</div>}
-          <input
-            type="text"
-            placeholder="First Name"
-            name="firstName"
-            value={formField.firstName}
-            onChange={handleChange}
-          />
-          {errorMessage.firstName && (
-            <span className="error">{errorMessage.firstName}</span>
-          )}
-          <br />
-          <input
-            type="text"
-            placeholder="Last Name"
-            name="lastName"
-            value={formField.lastName}
-            onChange={handleChange}
-          />
-          {errorMessage.lastName && (
-            <span className="error">{errorMessage.lastName}</span>
-          )}
-          <br />
-          <input
-            type="text"
-            placeholder="Email"
-            name="email"
-            value={formField.email}
-            onChange={handleChange}
-          />
-          {errorMessage.email && (
-            <span className="error">{errorMessage.email}</span>
-          )}
-          <br />
-          <input
-            type="text"
-            placeholder="Password"
-            name="password"
-            value={formField.password}
-            onChange={handleChange}
-          />
-          {errorMessage.password && (
-            <span className="error">{errorMessage.password}</span>
-          )}
-          <br />
+          <div>
+            <input
+              type="text"
+              placeholder="First Name"
+              {...register("firstName", { required: "First name is required" })}
+            />
+            {errors.firstName && (
+              <p className="error">{errors.firstName.message}</p>
+            )}
+          </div>
+
+          <div>
+            <input
+              type="text"
+              placeholder="Last Name"
+              {...register("lastName", { required: "Last name is required" })}
+            />
+            {errors.lastName && (
+              <p className="error">{errors.lastName.message}</p>
+            )}
+          </div>
+
+          <div>
+            <input
+              type="text"
+              placeholder="Email"
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/,
+                  message: "Invalid email id",
+                },
+              })}
+            />
+            {errors.email && <p className="error">{errors.email.message}</p>}
+          </div>
+
+          <div>
+            <input
+              type="text"
+              placeholder="Password"
+              {...register("password", {
+                required: "Password is required",
+                minLength: {
+                  value: 5,
+                  message: "Password must be more than 4 characters",
+                },
+                maxLength: {
+                  value: 20,
+                  message: "Password cannot be more than 20 characters",
+                },
+              })}
+            />
+            {errors.password && (
+              <p className="error">{errors.password.message}</p>
+            )}
+          </div>
           <button type="submit">Register</button>
         </form>
       </div>
